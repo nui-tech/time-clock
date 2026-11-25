@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#193e32">
+    <meta name="color-scheme" content="light">
+    <title>Time clock</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="/style.css">
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <div class="app">
+      <header class="header">
+        <a class="brand" href="/" aria-label="Time clock home">
+          <span class="clock-mark" aria-hidden="true"></span>
+          Time clock
+        </a>
+        <span class="timezone">Pacific/Auckland</span>
+      </header>
+
+      <main>
+        <div class="day-heading">
+          <div>
+            <h1 id="day-title">Today</h1>
+            <p id="day-subtitle" class="muted">Loading your day…</p>
+          </div>
+          <div class="date-controls">
+            <button id="today-button" class="button quiet" type="button">Today</button>
+            <label class="sr-only" for="day-picker">Work date</label>
+            <input id="day-picker" type="date" required>
+          </div>
+        </div>
+
+        <div id="notice" class="notice" role="alert" hidden>
+          <span id="notice-text"></span>
+          <button id="reload-button" class="button quiet" type="button">Reload</button>
+          <button id="dismiss-notice" class="button quiet" type="button" aria-label="Dismiss error">Dismiss</button>
+        </div>
+
+        <div class="overview">
+          <section class="timer-card" aria-labelledby="timer-heading">
+            <div class="timer-top">
+              <h2 id="timer-heading">Ready to start</h2>
+              <span id="running-status" class="running-status" hidden>Running</span>
+            </div>
+            <form id="active-description-form" class="active-description-form" hidden>
+              <label class="sr-only" for="active-description">Current session description</label>
+              <div class="active-description-controls">
+                <input id="active-description" type="text" maxlength="500"
+                  placeholder="Add a task description…" autocomplete="off">
+                <span id="description-save-status" class="description-save-status" role="status" hidden></span>
+              </div>
+              <p id="description-context" class="muted" hidden>This description belongs to the previous session.</p>
+            </form>
+            <div id="timer" class="timer" aria-label="Elapsed time">00:00:00</div>
+            <button id="start-work-button" class="button start-work" type="button" disabled>Start work</button>
+            <div class="timer-bottom">
+              <p id="active-started" class="muted">Your timer stays saved when you close this page.</p>
+              <div class="timer-actions">
+                <button id="stop-button" class="button stop" type="button" hidden>Stop timer</button>
+              </div>
+            </div>
+          </section>
+
+          <div class="day-sidebar">
+            <section class="day-total" aria-labelledby="total-label">
+              <h2 id="total-label">Total worked today</h2>
+              <strong id="day-total">0h 00m</strong>
+            </section>
+            <section class="day-card" aria-labelledby="clock-out-heading">
+              <h2 id="clock-out-heading">Clock out</h2>
+              <form id="clock-out-form">
+                <label class="sr-only" for="clock-out-time">Daily clock-out time</label>
+                <div class="clock-out-controls">
+                  <input id="clock-out-time" type="time" aria-describedby="clock-out-help">
+                  <button class="button secondary" type="submit">Save</button>
+                </div>
+                <div class="clock-out-detail">
+                  <p id="clock-out-help" class="muted">Set a finish time for this day.</p>
+                  <button id="clear-clock-out" class="text-button" type="button" hidden>Clear</button>
+                </div>
+              </form>
+            </section>
+          </div>
+        </div>
+
+        <section class="week-summary" aria-labelledby="week-heading">
+          <div class="week-summary-heading">
+            <div>
+              <h2 id="week-heading">This week</h2>
+              <p id="week-range" class="muted"></p>
+            </div>
+            <strong id="week-total" aria-label="Total worked this week">0h 00m</strong>
+          </div>
+          <div id="week-days" class="week-days"></div>
+        </section>
+
+        <section class="section" aria-labelledby="tasks-heading">
+          <div class="section-heading">
+            <h2 id="tasks-heading">Tasks</h2>
+          </div>
+          <form id="new-task-form" class="new-task-form">
+            <div class="new-task-fields">
+              <label class="task-description-field">
+                <span>Task <span class="optional">(optional)</span></span>
+                <input id="new-task-description" type="text" maxlength="500" required
+                  placeholder="What are you working on?" autocomplete="off">
+              </label>
+              <label class="planned-time-field">
+                <span>Planned start <span class="optional">(optional)</span></span>
+                <input id="new-task-time" type="time">
+              </label>
+            </div>
+            <div class="new-task-actions">
+              <button class="button secondary" type="submit" value="add">Add task</button>
+              <button id="start-new-task" class="button secondary" type="submit" value="start" formnovalidate>Start task</button>
+            </div>
+          </form>
+          <div id="tasks" class="task-list"></div>
+          <p id="tasks-empty" class="empty" hidden>Add a task to plan your day.</p>
+        </section>
+
+        <section class="section sessions-section" aria-labelledby="sessions-heading">
+          <div class="section-heading">
+            <h2 id="sessions-heading">Recorded sessions</h2>
+          </div>
+          <div id="sessions" class="session-list"></div>
+          <p id="sessions-empty" class="empty" hidden>No sessions yet.</p>
+        </section>
+      </main>
+      <footer>Times shown in Pacific/Auckland</footer>
+    </div>
+
+    <dialog id="task-dialog">
+      <form id="edit-task-form" class="dialog-form">
+        <h2>Edit task</h2>
+        <label>
+          <span>Description</span>
+          <input id="edit-task-description" type="text" maxlength="500" required>
+        </label>
+        <label>
+          <span>Planned start <span class="optional">(optional)</span></span>
+          <input id="edit-task-time" type="time">
+        </label>
+        <p id="task-error" class="form-error" role="alert" hidden></p>
+        <div class="dialog-actions">
+          <button class="button quiet" type="button" data-close-dialog>Cancel</button>
+          <button class="button primary" type="submit">Save task</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="session-dialog">
+      <form id="edit-session-form" class="dialog-form">
+        <h2>Edit session</h2>
+        <label>
+          <span>Description <span class="optional">(optional)</span></span>
+          <input id="edit-session-description" type="text" maxlength="500" placeholder="What were you working on?">
+        </label>
+        <label>
+          <span>Started</span>
+          <input id="edit-session-start" type="datetime-local" step="1" required>
+        </label>
+        <label>
+          <span>Finished</span>
+          <input id="edit-session-finish" type="datetime-local" step="1">
+        </label>
+        <p id="session-finish-help" class="muted">Leave finish empty to keep this session running.</p>
+        <p class="muted">Times shown in Pacific/Auckland</p>
+        <p id="session-error" class="form-error" role="alert" hidden></p>
+        <div class="dialog-actions">
+          <button class="button quiet" type="button" data-close-dialog>Cancel</button>
+          <button class="button primary" type="submit">Save session</button>
+        </div>
+      </form>
+    </dialog>
+  </body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "personal-time-clock",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler d1 migrations apply DB --local && wrangler dev --ip 127.0.0.1",
+    "test": "node --test",
+    "check": "node --check src/index.js && node --check src/api.js && node --check public/app.js && node --check public/time.js && node --check public/description-autosave.js",
+    "build": "wrangler deploy --dry-run --outdir .wrangler/build"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
